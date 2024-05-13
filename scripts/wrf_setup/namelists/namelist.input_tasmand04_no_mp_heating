@@ -1,0 +1,115 @@
+ &time_control
+ start_year                          = START_YYYY,START_YYYY,START_YYYY,START_YYYY,
+ start_month                         = START_MM,START_MM,START_MM,START_MM,
+ start_day                           = START_DD,START_DD,START_DD,START_DD,
+ start_hour                          = START_HH,START_HH,START_HH,START_HH
+ end_year                            = END_YYYY,END_YYYY,END_YYYY,END_YYYY,
+ end_month                           = END_MM,END_MM,END_MM,END_MM,
+ end_day                             = END_DD,END_DD,END_DD,END_DD,
+ end_hour                            = END_HH,END_HH,END_HH,END_HH,
+ interval_seconds                    = 3600,
+ input_from_file                     = .true.,.true.,.true.,.true.,
+ history_interval                    = 60,60,60,60,
+ frames_per_outfile                  = 1,1,1,1,
+ restart                             = .false.,
+ restart_interval                    = 180,
+ io_form_history                     = 2,
+ io_form_restart                     = 2,
+ io_form_input                       = 2,
+ io_form_boundary                    = 2,
+ nwp_diagnostics                     = 1,
+ history_outname                     = 'OUTDIR/wrfout_d<domain>_<date>',
+ iofields_filename                   = output_stream_tasman.txt,output_stream_tasman.txt,output_stream_tasman.txt,output_stream_tasman.txt,
+ auxhist7_outname                    = 'OUTDIR/highres_d<domain>_<date>',
+ auxhist7_interval                   = 60, 60, 60, 10,
+ frames_per_auxhist7                 = 1, 1, 1, 1,
+ io_form_auxhist7                    = 2,
+ auxhist8_outname                    = 'OUTDIR/sfcwind_d<domain>_<date>',
+ auxhist8_interval                   = 60, 60, 60, 1,
+ frames_per_auxhist8                 = 1, 1, 1, 1,
+ io_form_auxhist8                    = 2,
+ override_restart_timers             = .true.,
+ /
+
+ &domains
+ time_step                           = 60,
+ time_step_fract_num                 = 0,
+ time_step_fract_den                 = 1,
+ max_dom                             = 4,
+ e_we                                = 120,205,382,682,
+ e_sn                                = 120,205,382,682,
+ e_vert                              = 86,86,86,86,
+ dzstretch_s                         = 1.1,
+ p_top_requested                     = 5000,
+ num_metgrid_levels                  = 38,
+ num_metgrid_soil_levels             = 4,
+ dx                                  = 12000,4000,1333.33,444.44,
+ dy                                  = 12000,4000,1333.33,444.44,
+ grid_id                             = 1,     2,     3,     4,
+ parent_id                           = 0,     1,     2,     3,
+ i_parent_start                      = 1,     26,    40,    80,
+ j_parent_start                      = 1,     26,    38,    80,
+ parent_grid_ratio                   = 1,     3,     3,     3,
+ parent_time_step_ratio              = 1,     3,     3,     3,
+ feedback                            = 1,
+ smooth_option                       = 0
+ /
+
+ &physics
+ physics_suite                       = 'CONUS',
+ mp_physics                          = 17,    17,    17,    17,
+ cu_physics                          = 11,     0,     0,     0,
+ ra_lw_physics                       =  4,     4,     4,     4,
+ ra_sw_physics                       =  4,     4,     4,     4,
+ bl_pbl_physics                      = 11,    11,    11,    11,
+ sf_sfclay_physics                   =  1,     1,     1,     1,
+ sf_surface_physics                  =  4,     4,     4,     4,
+ radt                                = 10,    10,    10,    10,
+ bldt                                =  0,     0,     0,     0,
+ cudt                                =  0,     0,     0,     0,
+ icloud                              = 1,
+ num_land_cat                        = 21,
+ sf_urban_physics                    = 0,     0,      0,     0,
+ fractional_seaice                   = 1,
+ do_radar_ref                        = 1,
+ no_mp_heating                       = 1,
+ /
+
+ &fdda
+ /
+
+ &dynamics
+ hybrid_opt                          = 2, 
+ w_damping                           = 0,
+ diff_opt                            = 2,      2,      2,     2,
+ km_opt                              = 4,      4,      4,     4,
+ diff_6th_opt                        = 0,      0,      0,     0,
+ diff_6th_factor                     = 0.12,   0.12,   0.12,  0.12,
+ base_temp                           = 290.,
+ damp_opt                            = 3,
+ zdamp                               = 5000.,  5000.,  5000., 5000.,
+ dampcoef                            = 0.2,    0.2,    0.2,   0.2,
+ khdif                               = 0,      0,      0,     0,
+ kvdif                               = 0,      0,      0,     0,
+ non_hydrostatic                     = .true., .true., .true.,.true.,
+ moist_adv_opt                       = 1,      1,      1,     1,
+ scalar_adv_opt                      = 1,      1,      1,     1,
+ gwd_opt                             = 1,
+ /
+
+ &bdy_control
+ spec_bdy_width                      = 5,
+ specified                           = .true.,
+ /
+
+ &grib2
+ /
+
+ &namelist_quilt
+ nio_tasks_per_group = 0,
+ nio_groups = 1,
+ /
+
+ &afwa
+ afwa_severe_opt = 1, 1, 1, 1,
+ /

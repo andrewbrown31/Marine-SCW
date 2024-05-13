@@ -1,0 +1,92 @@
+#!/bin/bash
+
+########################################################################################################################################################
+# WPS SET UP
+########################################################################################################################################################
+
+#Geogrid settings (0=don't run, 1=Run)
+RUN_GEOG=0
+
+#SUFFIX for run name (e.g., if changing some settings, then change the prefix to keep the first run)
+SUFFIX="_ramssa_shortlead_3Kplus"
+
+#Set the start and end date for the run and save as variables
+START_YYYY=2023
+START_MM=10
+START_DD=16
+START_HH=00
+END_YYYY=2023
+END_MM=10
+END_DD=16
+END_HH=12
+START=$START_YYYY"-"$START_MM"-"$START_DD"_"$START_HH":00:00"
+END=$END_YYYY"-"$END_MM"-"$END_DD"_"$END_HH":00:00"
+
+#Grab the namelist, and place it in /WPS as namelist.wps
+cd /g/data/eg3/ab4502/WRF/WPS
+cp namelist.wps_tasmand04_ramssa namelist.wps
+sed -i "s/START/$START/g" namelist.wps
+sed -i "s/END/$END/g" namelist.wps
+
+#Run geogrid
+if [ $RUN_GEOG -eq 1 ]
+then
+ echo RUNNING GEOGRID.EXE...
+ ./geogrid.exe
+fi
+
+#Remove previous met files. Then, run metgrid. Then remove any intermediate files, plus the ERA5 downloads
+rm /g/data/eg3/ab4502/WRF/WPS/met_em.d*
+./metgrid.exe
+
+########################################################################################################################################################
+# REAL SET UP
+########################################################################################################################################################
+
+#Set PBS resources
+WALLTIME="48:00:00"
+MEM="384GB"
+NCPU=144
+PROJECT="w40"
+
+#Go to the run directory. This is a restart, so should already exist with all the necessary files
+RUNDIR="/g/data/eg3/ab4502/WRF/WRF/run_tasman_d04_20231015_20231016_ramssa_shortlead_3Kplus/"
+cd $RUNDIR
+
+#Grab namelist, and place it in /WRF/test/em_real/ as namelist.input
+cp ../test/em_real/namelist.input_tasmand04_restart namelist.input
+sed -i "s/START_YYYY/$START_YYYY/g" namelist.input
+sed -i "s/START_MM/$START_MM/g" namelist.input
+sed -i "s/START_DD/$START_DD/g" namelist.input
+sed -i "s/START_HH/$START_HH/g" namelist.input
+sed -i "s/END_YYYY/$END_YYYY/g" namelist.input
+sed -i "s/END_MM/$END_MM/g" namelist.input
+sed -i "s/END_DD/$END_DD/g" namelist.input
+sed -i "s/END_HH/$END_HH/g" namelist.input
+
+#Make an output dir in /g/data/eg3/ab4502/WRF_simulations/ for this run. Edit namelist input to use this dir for output
+#https://forum.mmm.ucar.edu/phpBB3/viewtopic.php?t=8679
+OUTDIR="/g/data/${PROJECT}/ab4502/WRF_simulations/tasman_d04_${START_YYYY}${START_MM}${START_DD}_${END_YYYY}${END_MM}${END_DD}${SUFFIX}"
+mkdir $OUTDIR
+sed -i "s+OUTDIR+$OUTDIR+g" namelist.input
+
+#Link /WPS/met_em* to /WRF/test/em_real/ - but first remove previously linked files
+rm met_em.d0*
+ln -sf /g/data/eg3/ab4502/WRF/WPS/met_em.d01* .
+ln -sf /g/data/eg3/ab4502/WRF/WPS/met_em.d02* .
+ln -sf /g/data/eg3/ab4502/WRF/WPS/met_em.d03* .
+ln -sf /g/data/eg3/ab4502/WRF/WPS/met_em.d04* .
+
+#Run real_exe
+qsub run_real
+
+#Submit run_mpi
+cp run_mpi run_mpi_temp
+sed -i "s+WALLTIME+$WALLTIME+g" run_mpi_temp
+sed -i "s+MEM+$MEM+g" run_mpi_temp
+sed -i "s+NCPU+$NCPU+g" run_mpi_temp
+sed -i "s+PROJECT+$PROJECT+g" run_mpi_temp
+sed -i "s+RUNDIR+$RUNDIR+g" run_mpi_temp
+#qsub run_mpi_temp
+
+echo "WHEN THIS SCRIPT IS DONE, AND RUN_REAL.EXE (SUBMITTED TO QUEUE) IS COMPLETE, THEN DO: cd /g/data/eg3/ab4502/WRF/WRF/test/em_real; qsub run_mpi_temp"
